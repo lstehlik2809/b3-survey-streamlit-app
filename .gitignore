@@ -4,5 +4,7 @@ __pycache__/
 outputCharts/
 outputReport/
 B3_Report.docx
+*.xlsx
+!B3Inputs.xlsx
 *.xlsm
 *.docx
