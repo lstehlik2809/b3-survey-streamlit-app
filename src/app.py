@@ -20,9 +20,20 @@ st.set_page_config(page_title="B3 report", layout="wide")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_INPUT_PATH = PROJECT_ROOT / "B3Inputs.xlsx"
+REPORT_STATE_KEYS = [
+    "report_bytes",
+    "preview_html",
+    "positive_network_html",
+    "negative_network_html",
+    "layout_engine",
+    "stats",
+]
 
 
 def main() -> None:
+    if "upload_key" not in st.session_state:
+        st.session_state.upload_key = 0
+
     st.title("B3 report")
     st.write(
         "Nahrajte vyplněný Excelovský soubor v požadovaném formátu "
@@ -38,7 +49,11 @@ def main() -> None:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-    uploaded_file = st.file_uploader("Excel soubor", type=["xlsx", "xlsm"])
+    uploaded_file = st.file_uploader(
+        "Nahrát soubor",
+        type=["xlsx", "xlsm"],
+        key=f"uploaded_file_{st.session_state.upload_key}",
+    )
     generate_clicked = st.button(
         "Vygenerovat report",
         type="primary",
@@ -76,10 +91,10 @@ def _generate_report(uploaded_file) -> None:
                 st.session_state.stats = result.stats
 
         except B3InputError as exc:
-            st.session_state.pop("report_bytes", None)
+            _clear_report_state()
             st.error(str(exc))
         except Exception:
-            st.session_state.pop("report_bytes", None)
+            _clear_report_state()
             st.error("Report se nepodařilo vygenerovat.")
             with st.expander("Technické detaily"):
                 st.code(traceback.format_exc())
@@ -88,12 +103,17 @@ def _generate_report(uploaded_file) -> None:
 def _render_result() -> None:
     st.success("Report je připravený.")
 
-    st.download_button(
-        "Stáhnout B3_Report.docx",
-        data=st.session_state.report_bytes,
-        file_name="B3_Report.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    )
+    download_col, reset_col = st.columns([1, 1])
+    with download_col:
+        st.download_button(
+            "Stáhnout report",
+            data=st.session_state.report_bytes,
+            file_name="B3_Report.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
+    with reset_col:
+        if st.button("Smazat report"):
+            _reset_app()
 
     report_tab, network_tab = st.tabs(["Náhled reportu", "Interaktivní grafy"])
 
@@ -119,6 +139,17 @@ def _render_result() -> None:
                 height=760,
                 scrolling=False,
             )
+
+
+def _clear_report_state() -> None:
+    for key in REPORT_STATE_KEYS:
+        st.session_state.pop(key, None)
+
+
+def _reset_app() -> None:
+    _clear_report_state()
+    st.session_state.upload_key += 1
+    st.rerun()
 
 
 def _build_preview_html(result) -> str:
