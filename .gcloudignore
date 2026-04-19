@@ -1,0 +1,15 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+*.log
+.pytest_cache
+outputCharts
+outputReport
+B3_Report.docx
+B3Inputs.xlsx
+*.xlsm
+*.xlsx
+!B3Inputs.xlsx
+*.docx

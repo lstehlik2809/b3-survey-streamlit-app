@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.log
+outputCharts/
+outputReport/
+B3_Report.docx
+*.xlsm
+*.docx
