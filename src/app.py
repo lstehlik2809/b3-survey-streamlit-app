@@ -103,17 +103,14 @@ def _generate_report(uploaded_file) -> None:
 def _render_result() -> None:
     st.success("Report je připravený.")
 
-    download_col, reset_col = st.columns([1, 1])
-    with download_col:
-        st.download_button(
-            "Stáhnout report",
-            data=st.session_state.report_bytes,
-            file_name="B3_Report.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        )
-    with reset_col:
-        if st.button("Smazat report"):
-            _reset_app()
+    st.download_button(
+        "Stáhnout report",
+        data=st.session_state.report_bytes,
+        file_name="B3_Report.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+    if st.button("Smazat report"):
+        _reset_app()
 
     report_tab, network_tab = st.tabs(["Náhled reportu", "Interaktivní grafy"])
 
